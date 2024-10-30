@@ -14,6 +14,14 @@ resource "aws_api_gateway_request_validator" "default" {
   validate_request_parameters = true
 }
 
+resource "aws_api_gateway_model" "workflowJobQueuedModel" {
+  content_type = "application/json"
+  description  = "webhook example of workflow Job Queued"
+  name         = "workflowJobQueuedModel"
+  rest_api_id  = aws_api_gateway_rest_api.default.id
+  schema = file("./workflowJobQueuedModel.json")
+}
+
 resource "aws_api_gateway_resource" "termination_resource" {
   rest_api_id = aws_api_gateway_rest_api.default.id
   parent_id   = aws_api_gateway_rest_api.default.root_resource_id
@@ -34,6 +42,7 @@ resource "aws_api_gateway_method" "termination_method" {
   request_parameters = {
     "method.request.header.X-GitHub-Enterprise-Host" = false
   }
+depends_on = [ aws_api_gateway_method.workflowJobQueuedMethod ] 
 }
 
 
@@ -79,35 +88,3 @@ resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.default.id
   stage_name = "dev"
 }
-
-
-# resource "aws_api_gateway_method_settings" "example" {
-#   rest_api_id = aws_api_gateway_rest_api.default.id
-#   stage_name = aws_api_gateway_stage.example.stage_name
-#   method_path = aws_api_gateway_resource.main.path
-#   settings {
-#     metrics_enabled = true
-#     logging_level = "INFO"
-#     data_trace_enabled = true
-#     throttling_burst_limit = 5000
-#     throttling_rate_limit = 10000.0
-#   }
-# }
-
-# resource "aws_api_gateway_deployment" "default" {
-#   rest_api_id = aws_api_gateway_rest_api.default.id
-
-#   triggers = {
-#     redeployment = sha1(jsonencode(aws_api_gateway_rest_api.default.body))
-#   }
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
-
-# resource "aws_api_gateway_stage" "example" {
-#   deployment_id = aws_api_gateway_deployment.default.id
-#   rest_api_id   = aws_api_gateway_rest_api.default.id
-#   stage_name    = "dev"
-# }
