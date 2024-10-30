@@ -37,7 +37,7 @@ resource "aws_api_gateway_method" "termination_method" {
   request_validator_id = aws_api_gateway_request_validator.default.id
   # depoends on models
   request_models = {
-    "application/json" = "workflowJobCompletedModel"
+    "application/json" = "workflowJobQueuedModel"
   }
   request_parameters = {
     "method.request.header.X-GitHub-Enterprise-Host" = false
