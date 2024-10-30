@@ -19,7 +19,7 @@ resource "aws_api_gateway_model" "workflowJobQueuedModel" {
   description  = "webhook example of workflow Job Queued"
   name         = "workflowJobQueuedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = jsonencode(jsondecode(file("./workflowJobQueuedModel.json")))
+  schema = file("./workflowJobQueuedModel.js")
 }
 
 resource "aws_api_gateway_resource" "termination_resource" {
