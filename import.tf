@@ -174,14 +174,7 @@ resource "aws_api_gateway_integration_response" "webhook_integration_response" {
 
 # deployment and stage
 
-resource "aws_api_gateway_deployment" "deployment" {
-  depends_on = [
-    aws_api_gateway_integration.termination_lambda_integration
-  ]
 
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  stage_name = "dev"
-}
 
 
 
