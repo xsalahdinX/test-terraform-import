@@ -42,7 +42,7 @@ resource "aws_api_gateway_method" "termination_method" {
   request_parameters = {
     "method.request.header.X-GitHub-Enterprise-Host" = false
   }
-depends_on = [ aws_api_gateway_method.workflowJobQueuedMethod ] 
+depends_on = [ aws_api_gateway_model.workflowJobQueuedModel ] 
 }
 
 
