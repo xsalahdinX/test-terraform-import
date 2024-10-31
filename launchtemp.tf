@@ -121,7 +121,6 @@
 
   resource "aws_autoscaling_group" "web" {
     name                             = "github-actions-runner-asg"
-    availability_zones               = ["us-east-1b", "us-east-1e"]
     vpc_zone_identifier              = ["subnet-0e5b44bb0205a17de", "subnet-00e82af49f383f0af"] #private subnets
     max_size                         = 2
     min_size                         = 0
