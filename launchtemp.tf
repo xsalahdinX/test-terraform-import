@@ -130,7 +130,6 @@
     default_cooldown                 = 0
     launch_template {
       id      = aws_launch_template.action_lanch_template.id
-      name    = "github-actions-ubuntu-template"
     }
     tag {
       key                 = "Confidentiality"
