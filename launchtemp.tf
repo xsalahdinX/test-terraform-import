@@ -129,6 +129,8 @@
     health_check_type                = "EC2"
     default_cooldown                 = 0
     default_instance_warmup          = 0
+    protect_from_scale_in            = true
+
     launch_template {
       id      = aws_launch_template.action_lanch_template.id
     }
