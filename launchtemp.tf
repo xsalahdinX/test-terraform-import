@@ -119,7 +119,7 @@
 
   # autoscaling group configuration
 
-  resource "aws_autoscaling_group" "web" {
+  resource "aws_autoscaling_group" "action_asg" {
     name                             = "github-actions-runner-asg"
     vpc_zone_identifier              = ["subnet-0e5b44bb0205a17de", "subnet-00e82af49f383f0af"] #private subnets
     max_size                         = 2
@@ -128,7 +128,7 @@
     health_check_grace_period        = 120
     health_check_type                = "EC2"
     default_cooldown                 = 0
-    default_instance_warmup          = 0
+    # default_instance_warmup          = 0
     launch_template {
       id      = aws_launch_template.action_lanch_template.id
     }
