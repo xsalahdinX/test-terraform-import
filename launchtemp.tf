@@ -24,24 +24,24 @@ resource "aws_iam_role" "action_instance" {
   assume_role_policy = data.aws_iam_policy_document.instance_assume_role_policy.json
 }
 
-resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "role_policy_attachment1" {
   role       = aws_iam_role.action_instance.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
-resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "role_policy_attachment2" {
   role       = aws_iam_role.action_instance.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
-resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "role_policy_attachment3" {
   role       = aws_iam_role.action_instance.name
   policy_arn = "arn:aws:iam::aws:policy/AutoScalingFullAccess"
 }
-resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "role_policy_attachment4" {
   role       = aws_iam_role.action_instance.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "role_policy_attachment5" {
   role       = aws_iam_role.action_instance.name
   policy_arn = aws_iam_policy.coder_policy.arn
 
