@@ -94,8 +94,7 @@ resource "aws_security_group" "action_sg" {
 
 # launch template configuration
 
-resource "aws_launch_template" "web" {
-  default_version                      = 4
+resource "aws_launch_template" "action_lanch_template" {
   name                                 = "github-actions-ubuntu-template"
   description                          = "github-actions-runner-launch-template"
   image_id                             = "ami-06b21ccaeff8cd686"
@@ -114,5 +113,37 @@ resource "aws_launch_template" "web" {
   network_interfaces {
     security_groups              = [aws_security_group.action_sg.id] #p
     subnet_id                    = "subnet-0e5b44bb0205a17de" #private subnet
+  }
+}
+
+
+# autoscaling group configuration
+
+resource "aws_autoscaling_group" "web" {
+  name                             = "github-actions-runner-asg"
+  availability_zones               = ["us-east-1e", "us-east-1d"]
+  vpc_zone_identifier              = ["subnet-0e5b44bb0205a17de", "subnet-00e82af49f383f0af"] #private subnets
+  max_size                         = 2
+  min_size                         = 0
+  desired_capacity                 = 0
+  health_check_grace_period        = 120
+  health_check_type                = "EC2"
+  default_cooldown                 = 0
+  launch_template {
+    id      = aws_launch_template.action_lanch_template.id
+    name    = "github-actions-ubuntu-template"
+  }
+  tag {
+    key                 = "Confidentiality"
+    propagate_at_launch = true
+    value               = "C2"
+  }
+  warm_pool {
+    max_group_prepared_capacity = -1
+    min_size                    = 2
+    pool_state                  = "Stopped"
+    instance_reuse_policy {
+      reuse_on_scale_in = false
+    }
   }
 }
