@@ -21,7 +21,7 @@ resource "aws_iam_role" "action_instance" {
   name                  = "self-hosted-runner-role"
   description           = "self-hosted-runner-role"
   path                  = "/"
-  assume_role_policy = data.aws_iam_policy_document.instance_assume_role_policy.json
+  assume_role_policy = data.aws_iam_policy_document.aws_launch_template_instance_assume_role_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "role_policy_attachment1" {
@@ -65,7 +65,11 @@ resource "aws_security_group" "action_sg" {
     cidr_blocks      = ["0.0.0.0/0"]
     description      = "Allow outbound connections anywhere"
     from_port        = 0
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
     protocol         = "-1"
+    security_groups  = []
+    self             = false
     to_port          = 0
   }]
 
@@ -73,7 +77,11 @@ resource "aws_security_group" "action_sg" {
     cidr_blocks      = ["0.0.0.0/0"]
     description      = "Allow SSH inbound from anywhere"
     from_port        = 22
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
     protocol         = "tcp"
+    security_groups  = []
+    self             = false
     to_port          = 22
   }]
 
