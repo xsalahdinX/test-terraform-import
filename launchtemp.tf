@@ -115,7 +115,4 @@ resource "aws_launch_template" "web" {
     security_groups              = [aws_security_group.action_sg.id] #p
     subnet_id                    = "subnet-0e5b44bb0205a17de" #private subnet
   }
-  tag_specifications {
-    resource_type = "instance"
-  }
 }
