@@ -79,8 +79,6 @@ resource "aws_api_gateway_integration" "termination_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   passthrough_behavior    = "WHEN_NO_MATCH"
-  #after lmbda creations
-  # uri = aws_lambda_function.html_lambda.invoke_arn
   uri = aws_lambda_function.github_actions_termination.invoke_arn
 }
 
@@ -89,6 +87,10 @@ resource "aws_api_gateway_method_response" "termination_method_response" {
   resource_id = aws_api_gateway_resource.termination_resource.id
   http_method = aws_api_gateway_method.termination_method.http_method
   status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
 }
 
 resource "aws_api_gateway_integration_response" "termination_integration_response" {
@@ -148,6 +150,10 @@ resource "aws_api_gateway_method_response" "webhook_method_response" {
   resource_id = aws_api_gateway_resource.webhook_resource.id
   http_method = aws_api_gateway_method.webhook_method.http_method
   status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
 }
 
 resource "aws_api_gateway_integration_response" "webhook_integration_response" {
