@@ -42,7 +42,8 @@ resource "aws_lambda_function" "github_actions_termination" {
   package_type                       = "Zip"
   reserved_concurrent_executions     = -1
   skip_destroy                       = false
-
+  # source_code_hash                   =filebase64sha256("lambda_termination_function.py")
+  source_code_hash                   = data.archive_file.termination_lambda_package.output_base64sha256
   ephemeral_storage {
     size = 512
   }
@@ -66,4 +67,12 @@ resource "aws_lambda_function" "github_actions_termination" {
   tracing_config {
     mode = "PassThrough"
   }
+}
+
+resource "aws_lambda_permission" "apigw_lambda" {
+  statement_id = "AllowExecutionFromAPIGateway"
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.github_actions_termination.function_name
+  principal = "apigateway.amazonaws.com"
+  source_arn = "${aws_api_gateway_rest_api.default.execution_arn}/*/*/*"
 }
