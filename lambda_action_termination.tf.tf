@@ -24,6 +24,13 @@ resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attach
   policy_arn = aws_iam_policy.lambda_termination_policy.arn
 
 }
+resource "aws_cloudwatch_log_group" "actions_termination_log_group" {
+  name              = "/aws/lambda/github-actions-termination-fn"
+  retention_in_days = 14
+  tags = {
+    Confidentiality = "C2"
+  }
+}
 data "archive_file" "termination_lambda_package" {
   type        = "zip"
   source_file = "./python/lambda_termination_function.py"

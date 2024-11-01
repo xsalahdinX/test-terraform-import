@@ -24,6 +24,15 @@ resource "aws_iam_role_policy_attachment" "lambda_handler_role_policy_attachment
   policy_arn = aws_iam_policy.lambda_handler_policy.arn
 
 }
+
+resource "aws_cloudwatch_log_group" "actions_handler_log_group" {
+  name              = "/aws/lambda/github-actions-job-handler"
+  retention_in_days = 14
+  tags = {
+    Confidentiality = "C2"
+  }
+}
+
 data "archive_file" "handler_lambda_package" {
   type        = "zip"
   source_file = "./python/lambda_handler_function.py"
@@ -92,3 +101,4 @@ resource "aws_lambda_permission" "apigateway_lambda_handler_permission" {
 #     aws_lambda_permission.apigateway_lambda_handler_permission
 #   ]
 # }
+
