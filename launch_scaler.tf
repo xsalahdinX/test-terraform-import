@@ -14,7 +14,7 @@
   resource "aws_iam_policy" "coder_policy" {
     name   = "coder_policy"
     path   = "/"
-    policy = file("./coder_policy.json")
+    policy = file("./policies/coder_policy.json")
   }
 
   resource "aws_iam_role" "action_instance" {
@@ -99,7 +99,7 @@
     description                          = "github-actions-runner-launch-template"
     image_id                             = "ami-06b21ccaeff8cd686"
     instance_type                        = "t2.micro"
-    user_data                            = filebase64("./example.sh")
+    user_data                            = filebase64("./user_data/example.sh")
 
     tags = {
       Confidentiality   = "C2"

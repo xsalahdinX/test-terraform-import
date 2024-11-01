@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "aws_lambda_termination_assume_role_policy" {
 resource "aws_iam_policy" "lambda_termination_policy" {
   name   = "lambda_termination_policy"
   path   = "/"
-  policy = file("./lambda_termination_policy.json")
+  policy = file("./policies/lambda_termination_policy.json")
 }
 resource "aws_iam_role" "lambda_termination_role" {
   name                  = "github-actions-lambda-termination-role"
@@ -26,7 +26,7 @@ resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attach
 }
 data "archive_file" "termination_lambda_package" {
   type        = "zip"
-  source_file = "lambda_termination_function.py"
+  source_file = "./python/lambda_termination_function.py"
   output_path = "lambda_termination_function_payload.zip"
 }
 
@@ -85,14 +85,14 @@ resource "aws_lambda_permission" "apigateway_lambda_termination_permission" {
   ]
 }
 
-resource "aws_lambda_invocation" "aws_lambda_termination_invocation" {
-  function_name = aws_lambda_function.github_actions_termination.function_name
-  input = jsonencode({
-    key1 = "value1"
-    key2 = "value2"
-  })
+# resource "aws_lambda_invocation" "aws_lambda_termination_invocation" {
+#   function_name = aws_lambda_function.github_actions_termination.function_name
+#   input = jsonencode({
+#     key1 = "value1"
+#     key2 = "value2"
+#   })
 
-  depends_on = [
-    aws_lambda_permission.apigateway_lambda_termination_permission
-  ]
-}
+#   depends_on = [
+#     aws_lambda_permission.apigateway_lambda_termination_permission
+#   ]
+# }

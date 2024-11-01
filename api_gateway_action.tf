@@ -14,10 +14,6 @@ resource "aws_api_gateway_request_validator" "default" {
   validate_request_parameters = true
 }
 
-
-
-
-
 # models
 
 resource "aws_api_gateway_model" "workflowJobCompletedModel" {
@@ -25,7 +21,7 @@ resource "aws_api_gateway_model" "workflowJobCompletedModel" {
   description  = "webhook example of workflow Job Queued"
   name         = "workflowJobCompletedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./workflowJobCompletedModel.json")
+  schema = file("./models/workflowJobCompletedModel.json")
 }
 
 resource "aws_api_gateway_model" "workflowJobQueuedModel" {
@@ -33,7 +29,7 @@ resource "aws_api_gateway_model" "workflowJobQueuedModel" {
   description  = "webhook example of workflow Job Queued"
   name         = "workflowJobQueuedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./workflowJobQueuedModel.json")
+  schema = file("./models/workflowJobQueuedModel.json")
 }
 
 resource "aws_api_gateway_model" "workflowRunRequestedModel" {
@@ -41,7 +37,7 @@ resource "aws_api_gateway_model" "workflowRunRequestedModel" {
   description  = "webhook example of workflow Job Queued"
   name         = "workflowRunRequestedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./workflowRunRequestedModel.json")
+  schema = file("./models/workflowRunRequestedModel.json")
 }
 
 
@@ -143,9 +139,7 @@ resource "aws_api_gateway_integration" "webhook_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   passthrough_behavior    = "WHEN_NO_MATCH"
-  #after lmbda creations
-  # uri = aws_lambda_function.html_lambda.invoke_arn
-  uri                     = "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:654654225119:function:cfst-1449-e3b2dff83c8e721fffb7950cf18-InitFunction-3G0DAqUCn87D/invocations"
+  uri                     = aws_lambda_function.lambda_handler_role.invoke_arn
 
 }
 

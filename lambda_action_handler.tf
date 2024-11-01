@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "aws_lambda_handler_assume_role_policy" {
 resource "aws_iam_policy" "lambda_handler_policy" {
   name   = "lambda_handler_policy"
   path   = "/"
-  policy = file("./lambda_handler_policy.json")
+  policy = file("./policies/lambda_handler_policy.json")
 }
 resource "aws_iam_role" "lambda_handler_role" {
   name                  = "github-actions-lambda-handler-role"
@@ -26,7 +26,7 @@ resource "aws_iam_role_policy_attachment" "lambda_handler_role_policy_attachment
 }
 data "archive_file" "handler_lambda_package" {
   type        = "zip"
-  source_file = "lambda_handler_function.py"
+  source_file = "./python/lambda_handler_function.py"
   output_path = "lambda_handler_function_payload.zip"
 }
 
@@ -81,14 +81,14 @@ resource "aws_lambda_permission" "apigateway_lambda_handler_permission" {
   ]
 }
 
-resource "aws_lambda_invocation" "aws_lambda_handler_invocation" {
-  function_name = aws_lambda_function.actions_handler_lambda_function.function_name
-  input = jsonencode({
-    key1 = "value1"
-    key2 = "value2"
-  })
+# resource "aws_lambda_invocation" "aws_lambda_handler_invocation" {
+#   function_name = aws_lambda_function.actions_handler_lambda_function.function_name
+#   input = jsonencode({
+#     key1 = "value1"
+#     key2 = "value2"
+#   })
 
-  depends_on = [
-    aws_lambda_permission.apigateway_lambda_handler_permission
-  ]
-}
+#   depends_on = [
+#     aws_lambda_permission.apigateway_lambda_handler_permission
+#   ]
+# }
