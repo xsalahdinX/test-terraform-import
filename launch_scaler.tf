@@ -98,7 +98,7 @@
     name                                 = "github-actions-ubuntu-template"
     description                          = "github-actions-runner-launch-template"
     image_id                             = "ami-06b21ccaeff8cd686"
-    instance_type                        = "t2.micro"
+    instance_type                        = "t3.medium"
     user_data                            = filebase64("./user_data/example.sh")
 
     tags = {
