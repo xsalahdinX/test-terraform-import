@@ -24,17 +24,21 @@ resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attach
   policy_arn = aws_iam_policy.lambda_termination_policy.arn
 
 }
-
+data "archive_file" "termination_lambda_package" {
+  type        = "zip"
+  source_file = "lambda_termination_function.py"
+  output_path = "lambda_termination_function_payload.zip"
+}
 
 resource "aws_lambda_function" "github_actions_termination" {
   function_name                      = "github-actions-termination-fn"
   architectures                      = ["x86_64"]
   runtime                            = "python3.12"
   handler                            = "lambda_function.lambda_handler"
+  filename                           = "lambda_termination_function_payload.zip"
   memory_size                        = 128
   timeout                            = 900
   role                               = aws_iam_role.lambda_termination_role.arn
-  layers                             = []
   package_type                       = "Zip"
   reserved_concurrent_executions     = -1
   skip_destroy                       = false
