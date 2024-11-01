@@ -16,7 +16,7 @@ resource "aws_iam_policy" "lambda_termination_policy" {
 resource "aws_iam_role" "lambda_termination_role" {
   name                  = "github-actions-lambda-termination-role"
   path                  = "/service-role/"
-  assume_role_policy = data.aws_iam_policy_document.aws_l_assume_role_policy.json
+  assume_role_policy    = data.aws_iam_policy_document.aws_lambda_termination_assume_role_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attachment" {
