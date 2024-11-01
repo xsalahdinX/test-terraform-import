@@ -85,8 +85,7 @@ resource "aws_api_gateway_integration" "termination_lambda_integration" {
   passthrough_behavior    = "WHEN_NO_MATCH"
   #after lmbda creations
   # uri = aws_lambda_function.html_lambda.invoke_arn
-  uri                     = "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:654654225119:function:cfst-1449-e3b2dff83c8e721fffb7950cf18-InitFunction-3G0DAqUCn87D/invocations"
-
+  uri = aws_lambda_function.github_actions_termination.invoke_arn
 }
 
 resource "aws_api_gateway_method_response" "termination_method_response" {
@@ -171,6 +170,7 @@ resource "aws_api_gateway_integration_response" "webhook_integration_response" {
 
 
 
+
 # deployment and stage
 
 resource "aws_api_gateway_deployment" "deployment" {
@@ -181,50 +181,3 @@ resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.default.id
   stage_name = "dev"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# resource "aws_api_gateway_method_settings" "example" {
-#   rest_api_id = aws_api_gateway_rest_api.default.id
-#   stage_name = aws_api_gateway_stage.example.stage_name
-#   method_path = aws_api_gateway_resource.main.path
-#   settings {
-#     metrics_enabled = true
-#     logging_level = "INFO"
-#     data_trace_enabled = true
-#     throttling_burst_limit = 5000
-#     throttling_rate_limit = 10000.0
-#   }
-# }
-
-# resource "aws_api_gateway_deployment" "default" {
-#   rest_api_id = aws_api_gateway_rest_api.default.id
-
-#   triggers = {
-#     redeployment = sha1(jsonencode(aws_api_gateway_rest_api.default.body))
-#   }
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
-
-# resource "aws_api_gateway_stage" "example" {
-#   deployment_id = aws_api_gateway_deployment.default.id
-#   rest_api_id   = aws_api_gateway_rest_api.default.id
-#   stage_name    = "dev"
-# }
