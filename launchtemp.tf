@@ -127,7 +127,7 @@
     desired_capacity                 = 0
     health_check_grace_period        = 120
     health_check_type                = "EC2"
-    default_cooldown                 = 0
+    default_cooldown                 = 1
     default_instance_warmup          = 0
     protect_from_scale_in            = true
 
