@@ -59,7 +59,7 @@
   resource "aws_security_group" "action_sg" {
     name               = "action-self-hosted-runner-SG"
     description        = "action-self-hosted-runner-sg"
-    vpc_id             = "vpc-07d665334c788078d"
+    vpc_id             = "vpc-0c2b1f04da456303e"
 
     egress = [{
       cidr_blocks      = ["0.0.0.0/0"]
@@ -112,7 +112,7 @@
       }
     network_interfaces {
       security_groups              = [aws_security_group.action_sg.id] #p
-      subnet_id                    = "subnet-0e5b44bb0205a17de" #private subnet
+      subnet_id                    = "subnet-02b9401ef805e2b47" #private subnet
     }
   }
 
@@ -121,7 +121,7 @@
 
   resource "aws_autoscaling_group" "action_asg" {
     name                             = "github-actions-runner-asg"
-    vpc_zone_identifier              = ["subnet-0e5b44bb0205a17de", "subnet-00e82af49f383f0af"] #private subnets
+    vpc_zone_identifier              = ["subnet-02b9401ef805e2b47", "subnet-04b2d4033530fae4f"] #private subnets
     max_size                         = 2
     min_size                         = 0
     desired_capacity                 = 0
