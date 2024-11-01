@@ -26,7 +26,7 @@ resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attach
 }
 resource "aws_cloudwatch_log_group" "actions_termination_log_group" {
   name              = "/aws/lambda/github-actions-termination-fn"
-  retention_in_days = 14
+  retention_in_days = 0
   tags = {
     Confidentiality = "C2"
   }

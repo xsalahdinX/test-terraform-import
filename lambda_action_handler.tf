@@ -27,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "lambda_handler_role_policy_attachment
 
 resource "aws_cloudwatch_log_group" "actions_handler_log_group" {
   name              = "/aws/lambda/github-actions-job-handler"
-  retention_in_days = 14
+  retention_in_days = 0
   tags = {
     Confidentiality = "C2"
   }
