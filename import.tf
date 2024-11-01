@@ -1,183 +1,98 @@
+data "aws_iam_policy_document" "aws_lambda_termination_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
 
-resource "aws_api_gateway_rest_api" "default" {
-  name              = "github-actions-handler-rest-api"
-  description       = "This is the description of the API"
-
-  endpoint_configuration {
-    types = ["REGIONAL"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
   }
 }
-resource "aws_api_gateway_request_validator" "default" {
-  name                        = "Validate body, query string parameters, and headers"
-  rest_api_id                 = aws_api_gateway_rest_api.default.id
-  validate_request_body       = true
-  validate_request_parameters = true
+resource "aws_iam_policy" "lambda_termination_policy" {
+  name   = "lambda_termination_policy"
+  path   = "/"
+  policy = file("./lambda_termination_policy.json")
+}
+resource "aws_iam_role" "lambda_termination_role" {
+  name                  = "github-actions-lambda-termination-role"
+  path                  = "/service-role/"
+  assume_role_policy    = data.aws_iam_policy_document.aws_lambda_termination_assume_role_policy.json
 }
 
-
-
-
-
-# models
-
-resource "aws_api_gateway_model" "workflowJobCompletedModel" {
-  content_type = "application/json"
-  description  = "webhook example of workflow Job Queued"
-  name         = "workflowJobCompletedModel"
-  rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./workflowJobCompletedModel.json")
-}
-
-resource "aws_api_gateway_model" "workflowJobQueuedModel" {
-  content_type = "application/json"
-  description  = "webhook example of workflow Job Queued"
-  name         = "workflowJobQueuedModel"
-  rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./workflowJobQueuedModel.json")
-}
-
-resource "aws_api_gateway_model" "workflowRunRequestedModel" {
-  content_type = "application/json"
-  description  = "webhook example of workflow Job Queued"
-  name         = "workflowRunRequestedModel"
-  rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./workflowRunRequestedModel.json")
-}
-
-
-# termination_resource
-
-resource "aws_api_gateway_resource" "termination_resource" {
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  parent_id   = aws_api_gateway_rest_api.default.root_resource_id
-  path_part   = "termination"
+resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attachment" {
+  role       = aws_iam_role.lambda_termination_role.name
+  policy_arn = aws_iam_policy.lambda_termination_policy.arn
 
 }
+data "archive_file" "termination_lambda_package" {
+  type        = "zip"
+  source_file = "lambda_termination_function.py"
+  output_path = "lambda_termination_function_payload.zip"
+}
 
-
-
-
-resource "aws_api_gateway_method" "termination_method" {
-  rest_api_id   = aws_api_gateway_rest_api.default.id
-  resource_id   = aws_api_gateway_resource.termination_resource.id
-  http_method   = "POST"
-  authorization = "NONE"
-  request_validator_id = aws_api_gateway_request_validator.default.id
-  # depoends on models
-  request_models = {
-    "application/json" = "workflowJobCompletedModel"
+resource "aws_lambda_function" "github_actions_termination" {
+  function_name                      = "github-actions-termination-fn"
+  architectures                      = ["x86_64"]
+  runtime                            = "python3.12"
+  handler                            = "lambda_function.lambda_handler"
+  filename                           = "lambda_termination_function_payload.zip"
+  memory_size                        = 128
+  timeout                            = 900
+  role                               = aws_iam_role.lambda_termination_role.arn
+  package_type                       = "Zip"
+  reserved_concurrent_executions     = -1
+  skip_destroy                       = false
+  # source_code_hash                   =filebase64sha256("lambda_termination_function.py")
+  source_code_hash                   = data.archive_file.termination_lambda_package.output_base64sha256
+  ephemeral_storage {
+    size = 512
   }
-  request_parameters = {
-    "method.request.header.X-GitHub-Enterprise-Host" = false
+
+  tags = {
+    Confidentiality   = "C2"
   }
-depends_on = [ aws_api_gateway_model.workflowJobCompletedModel ] 
-}
 
+  environment {
+    variables = {
+      DEBUG        = "true"
+      GITHUB_TOKEN = "ghp_sdfsdf"
+    }
+  }
 
+  logging_config {
+    log_format            = "Text"
+    log_group             = "/aws/lambda/github-actions-termination-fn"
+  }
 
-
-resource "aws_api_gateway_integration" "termination_lambda_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.default.id
-  resource_id             = aws_api_gateway_resource.termination_resource.id
-  http_method             = aws_api_gateway_method.termination_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  passthrough_behavior    = "WHEN_NO_MATCH"
-  #after lmbda creations
-  # uri = aws_lambda_function.html_lambda.invoke_arn
-  uri = aws_lambda_function.github_actions_termination.invoke_arn
-}
-
-resource "aws_api_gateway_method_response" "termination_method_response" {
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  resource_id = aws_api_gateway_resource.termination_resource.id
-  http_method = aws_api_gateway_method.termination_method.http_method
-  status_code = "200"
-}
-
-resource "aws_api_gateway_integration_response" "termination_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  resource_id = aws_api_gateway_resource.termination_resource.id
-  http_method = aws_api_gateway_method.termination_method.http_method
-  status_code = aws_api_gateway_method_response.termination_method_response.status_code
+  tracing_config {
+    mode = "PassThrough"
+  }
 
   depends_on = [
-    aws_api_gateway_method.termination_method,
-    aws_api_gateway_integration.termination_lambda_integration
+    aws_iam_role_policy_attachment.lambda_termination_role_policy_attachment
   ]
 }
 
-
-# webhook_resource
-
-
-resource "aws_api_gateway_resource" "webhook_resource" {
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  parent_id   = aws_api_gateway_rest_api.default.root_resource_id
-  path_part   = "webhook"
-
-}
-
-resource "aws_api_gateway_method" "webhook_method" {
-  rest_api_id   = aws_api_gateway_rest_api.default.id
-  resource_id   = aws_api_gateway_resource.webhook_resource.id
-  http_method   = "POST"
-  authorization = "NONE"
-  request_validator_id = aws_api_gateway_request_validator.default.id
-
-  request_models = {
-    "application/json" = "workflowJobQueuedModel"
-  }
-  request_parameters = {
-    "method.request.header.X-GitHub-Enterprise-Host" = true
-  }
-depends_on = [ aws_api_gateway_model.workflowJobQueuedModel ] 
-}
-
-
-
-resource "aws_api_gateway_integration" "webhook_lambda_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.default.id
-  resource_id             = aws_api_gateway_resource.webhook_resource.id
-  http_method             = aws_api_gateway_method.webhook_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  passthrough_behavior    = "WHEN_NO_MATCH"
-  #after lmbda creations
-  # uri = aws_lambda_function.html_lambda.invoke_arn
-  uri                     = "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:654654225119:function:cfst-1449-e3b2dff83c8e721fffb7950cf18-InitFunction-3G0DAqUCn87D/invocations"
-
-}
-
-resource "aws_api_gateway_method_response" "webhook_method_response" {
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  resource_id = aws_api_gateway_resource.webhook_resource.id
-  http_method = aws_api_gateway_method.webhook_method.http_method
-  status_code = "200"
-}
-
-resource "aws_api_gateway_integration_response" "webhook_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  resource_id = aws_api_gateway_resource.termination_resource.id
-  http_method = aws_api_gateway_method.termination_method.http_method
-  status_code = aws_api_gateway_method_response.termination_method_response.status_code
+resource "aws_lambda_permission" "apigateway_lambda_termination_permission" {
+  statement_id = "AllowExecutionFromAPIGateway"
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.github_actions_termination.function_name
+  principal = "apigateway.amazonaws.com"
+  source_arn = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/termination"
 
   depends_on = [
-    aws_api_gateway_method.webhook_method,
-    aws_api_gateway_integration.webhook_lambda_integration
+    aws_lambda_function.github_actions_termination
   ]
 }
 
+resource "aws_lambda_invocation" "aws_lambda_termination_invocation" {
+  function_name = aws_lambda_function.github_actions_termination.function_name
+  input = jsonencode({
+    key1 = "value1"
+    key2 = "value2"
+  })
 
-
-
-# deployment and stage
-
-resource "aws_api_gateway_deployment" "deployment" {
   depends_on = [
-    aws_api_gateway_integration.termination_lambda_integration
+    aws_lambda_permission.apigateway_lambda_termination_permission
   ]
-
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  stage_name = "dev"
 }
