@@ -67,12 +67,32 @@ resource "aws_lambda_function" "github_actions_termination" {
   tracing_config {
     mode = "PassThrough"
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_termination_role_policy_attachment
+  ]
 }
 
-resource "aws_lambda_permission" "apigw_lambda" {
+resource "aws_lambda_permission" "apigateway_lambda_termination_permission" {
   statement_id = "AllowExecutionFromAPIGateway"
   action = "lambda:InvokeFunction"
   function_name = aws_lambda_function.github_actions_termination.function_name
   principal = "apigateway.amazonaws.com"
   source_arn = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/termination"
+
+  depends_on = [
+    aws_lambda_function.github_actions_termination
+  ]
+}
+
+resource "aws_lambda_invocation" "aws_lambda_termination_invocation" {
+  function_name = aws_lambda_function.github_actions_termination.function_name
+  input = jsonencode({
+    key1 = "value1"
+    key2 = "value2"
+  })
+
+  depends_on = [
+    aws_lambda_permission.apigateway_lambda_termination_permission
+  ]
 }
