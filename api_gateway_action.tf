@@ -139,7 +139,7 @@ resource "aws_api_gateway_integration" "webhook_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   passthrough_behavior    = "WHEN_NO_MATCH"
-  uri                     = aws_lambda_function.lambda_handler_role.invoke_arn
+  uri                     = aws_lambda_function.actions_handler_lambda_function.invoke_arn
 
 }
 
