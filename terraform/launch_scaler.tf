@@ -176,9 +176,9 @@ resource "aws_autoscaling_group" "action_asg" {
   dynamic "tag" {
     for_each = var.tags
     content {
-      key                 = tag.value.key
-      value               = tag.value.value
-      propagate_at_launch =  true
+      key    =  tag.key
+      value   =  tag.value
+      propagate_at_launch = true
     }
  }
 }
