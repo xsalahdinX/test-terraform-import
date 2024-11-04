@@ -84,7 +84,7 @@ resource "aws_lambda_permission" "apigateway_lambda_termination_permission" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.github_actions_termination.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/${terminate_path}"
+  source_arn    = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/${var.terminate_path}"
 
   depends_on = [
     aws_lambda_function.github_actions_termination
