@@ -19,8 +19,8 @@
                 "logs:CreateLogGroup"
             ],
             "Resource": [
-                "arn:aws:logs:eu-west-1:905418196748:*",
-                "arn:aws:iam::905418196748:role/self-hosted-runner-role"
+                "arn:aws:logs:${region}:${account_id}:*",
+                "arn:aws:iam::${account_id}:role/${launch_template_iam_role_name}"
             ]
         },
         {
@@ -30,7 +30,7 @@
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
-            "Resource": "arn:aws:logs:eu-west-1:905418196748:log-group:/aws/lambda/github-actions-job-handler:*"
+            "Resource": "arn:aws:logs:${region}:${account_id}:log-group:${aws_cloudwatch_log_group_handler_prefix}:*"
         }
     ]
 }

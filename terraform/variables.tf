@@ -143,3 +143,12 @@ variable "launch_template_root_device_kms_key_id" {
   type        = string
 
 }
+
+variable "region" {
+  description = " from terraform cloud"
+  type        = string
+
+}
+variable "account_id" {
+  type        = string
+}

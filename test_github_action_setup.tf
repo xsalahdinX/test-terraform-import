@@ -25,9 +25,13 @@ module "test_github_action_setup" {
   launch_template_subnet_id                   = "subnet-0aa85c4e6373475bb"
   launch_template_root_device_name            = "/dev/xvda"
   launch_template_root_device_kms_key_id      = "arn:aws:kms:us-east-1:637423340153:key/a7efc8c0-2981-41ac-87f2-7d7d32286cb7"
-  
+
   autoscaling_group_name                      = "github-actions-runner-asg"
   autoscaling_group_subnet_ids                = ["subnet-077dd5ef688fab8c8", "subnet-0aa85c4e6373475bb"] #private subnets
   security_group_vpc_id                       = "vpc-073562b4eaf0a57df"
+
+  account_id                                  = "905418196748"
+  region                                      = var.region
+
 
 }
