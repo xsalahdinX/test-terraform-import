@@ -26,10 +26,11 @@ module "test_github_action_setup" {
   launch_template_name                  = "github-actions-ubuntu-template"
   launch_template_instance_type         = "t3.medium"
   launch_template_ami_id                = "ami-06b21ccaeff8cd686"
-  launch_template_subnet_id             = "subnet-02b9401ef805e2b47"
+  launch_template_subnet_id             = "subnet-0aa85c4e6373475bb"
 
   autoscaling_group_name       = "github-actions-runner-asg"
-  autoscaling_group_subnet_ids = ["subnet-02b9401ef805e2b47", "subnet-04b2d4033530fae4f"] #private subnets
+  autoscaling_group_subnet_ids = ["subnet-077dd5ef688fab8c8", "subnet-0aa85c4e6373475bb"] #private subnets
+  security_group_vpc_id        = "vpc-073562b4eaf0a57df"
 
   access_key = var.access_key
   secret_key = var.secret_key

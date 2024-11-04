@@ -126,7 +126,11 @@ variable "autoscaling_group_subnet_ids" {
 
 }
 
-
+variable "security_group_vpc_id" {
+  description = "The VPC ID for the security group"
+  type        = string
+  
+}
 
 
 

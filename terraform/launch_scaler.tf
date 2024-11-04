@@ -58,7 +58,8 @@ resource "aws_iam_instance_profile" "action_instance_profile" {
 resource "aws_security_group" "action_sg" {
   name        = var.launch_template_sg_name
   description = "action-self-hosted-runner-sg"
-  vpc_id      = "vpc-0c2b1f04da456303e"
+  vpc_id      = var.security_group_vpc_id
+
 
   egress = [{
     cidr_blocks      = ["0.0.0.0/0"]
