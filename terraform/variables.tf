@@ -131,3 +131,15 @@ variable "security_group_vpc_id" {
   type        = string
   
 }
+
+variable "launch_template_root_device_name" {
+  description = "The name of the launch template root device"
+  type        = string
+
+}
+
+variable "launch_template_root_device_kms_key_id" {
+  description = "The KMS key ID for the launch template root device"
+  type        = string
+
+}

@@ -106,14 +106,15 @@ resource "aws_launch_template" "action_lanch_template" {
   }
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = var.launch_template_root_device_name
 
     ebs {
       volume_size = 30
       volume_type = "gp2"
       delete_on_termination = true
       encrypted = true
-      kms_key_id = "arn:aws:kms:us-east-1:637423340153:key/a7efc8c0-2981-41ac-87f2-7d7d32286cb7"
+      kms_key_id = var.launch_template_root_device_kms_key_id
+
     }
   }
 
