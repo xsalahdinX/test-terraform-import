@@ -113,6 +113,7 @@ resource "aws_launch_template" "action_lanch_template" {
       volume_type = "gp2"
       delete_on_termination = true
       encrypted = true
+      kms_key_id = "arn:aws:kms:us-east-1:637423340153:key/a7efc8c0-2981-41ac-87f2-7d7d32286cb7"
     }
   }
 
