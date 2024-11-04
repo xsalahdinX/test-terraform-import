@@ -113,7 +113,6 @@ resource "aws_launch_template" "action_lanch_template" {
       volume_type = "gp2"
       delete_on_termination = true
       encrypted = true
-      iops = 100
     }
   }
 
