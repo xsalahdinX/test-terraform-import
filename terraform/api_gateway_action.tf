@@ -170,8 +170,8 @@ resource "aws_api_gateway_integration_response" "webhook_integration_response" {
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.default.id
   stage_name  = var.aws_api_gateway_deployment
-  # depends_on = [
-  #   aws_api_gateway_integration.webhook_integration_response,
-  #   aws_api_gateway_integration.termination_integration_response
-  # ]
+  depends_on = [
+    aws_api_gateway_integration.webhook_integration_response,
+    aws_api_gateway_integration.termination_integration_response
+  ]
 }
