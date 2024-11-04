@@ -32,10 +32,4 @@ module "test_github_action_setup" {
   autoscaling_group_subnet_ids = ["subnet-077dd5ef688fab8c8", "subnet-0aa85c4e6373475bb"] #private subnets
   security_group_vpc_id        = "vpc-073562b4eaf0a57df"
 
-  access_key = var.access_key
-  secret_key = var.secret_key
-  region     = var.region
-
-
-
 }
