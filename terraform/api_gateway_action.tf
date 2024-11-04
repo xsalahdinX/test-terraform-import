@@ -18,7 +18,7 @@ resource "aws_api_gateway_request_validator" "default" {
 
 resource "aws_api_gateway_model" "workflowJobCompletedModel" {
   content_type = "application/json"
-  description  = "webhook example of workflow Job Queued"
+  description  = "actions workflow Job Completed"
   name         = "workflowJobCompletedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
   schema       = file("./models/workflowJobCompletedModel.json")
@@ -26,7 +26,7 @@ resource "aws_api_gateway_model" "workflowJobCompletedModel" {
 
 resource "aws_api_gateway_model" "workflowJobQueuedModel" {
   content_type = "application/json"
-  description  = "webhook example of workflow Job Queued"
+  description  = "actions workflow Job Queued"
   name         = "workflowJobQueuedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
   schema       = file("./models/workflowJobQueuedModel.json")
@@ -34,7 +34,7 @@ resource "aws_api_gateway_model" "workflowJobQueuedModel" {
 
 resource "aws_api_gateway_model" "workflowRunRequestedModel" {
   content_type = "application/json"
-  description  = "webhook example of workflow Job Queued"
+  description  = "actions workflow Job Requested"
   name         = "workflowRunRequestedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
   schema       = file("./models/workflowRunRequestedModel.json")
@@ -50,9 +50,6 @@ resource "aws_api_gateway_resource" "termination_resource" {
 
 }
 
-
-
-
 resource "aws_api_gateway_method" "termination_method" {
   rest_api_id          = aws_api_gateway_rest_api.default.id
   resource_id          = aws_api_gateway_resource.termination_resource.id
@@ -67,8 +64,6 @@ resource "aws_api_gateway_method" "termination_method" {
   }
   depends_on = [aws_api_gateway_model.workflowJobCompletedModel]
 }
-
-
 
 
 resource "aws_api_gateway_integration" "termination_lambda_integration" {
@@ -157,9 +152,9 @@ resource "aws_api_gateway_method_response" "webhook_method_response" {
 
 resource "aws_api_gateway_integration_response" "webhook_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.default.id
-  resource_id = aws_api_gateway_resource.termination_resource.id
-  http_method = aws_api_gateway_method.termination_method.http_method
-  status_code = aws_api_gateway_method_response.termination_method_response.status_code
+  resource_id = aws_api_gateway_resource.webhook_resource.id
+  http_method = aws_api_gateway_method.webhook_method.http_method
+  status_code = aws_api_gateway_method_response.webhook_method_response.status_code
 
   depends_on = [
     aws_api_gateway_method.webhook_method,
@@ -175,7 +170,4 @@ resource "aws_api_gateway_integration_response" "webhook_integration_response" {
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.default.id
   stage_name  = var.aws_api_gateway_deployment
-  depends_on = [
-    aws_api_gateway_integration.termination_lambda_integration
-  ]
 }
