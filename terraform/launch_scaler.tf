@@ -168,7 +168,7 @@ resource "aws_autoscaling_group" "action_asg" {
 
 
   tag {
-    key                 = "NAME"
+    key                 = "Name"
     value               = var.autoscaling_group_name
     propagate_at_launch = true
   }
