@@ -1,0 +1,36 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*",
+                "ec2:*",
+                "autoscaling:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "logs:CreateLogGroup"
+            ],
+            "Resource": [
+                "arn:aws:logs:eu-west-1:905418196748:*",
+                "arn:aws:iam::905418196748:role/self-hosted-runner-role"
+            ]
+        },
+        {
+            "Sid": "VisualEditor2",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:eu-west-1:905418196748:log-group:/aws/lambda/github-actions-job-handler:*"
+        }
+    ]
+}

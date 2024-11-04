@@ -1,7 +1,7 @@
 
 resource "aws_api_gateway_rest_api" "default" {
-  name              = "github-actions-handler-rest-api"
-  description       = "This is the description of the API"
+  name        = var.api_gateway_name
+  description = "This is api_gateway of github actions"
 
   endpoint_configuration {
     types = ["REGIONAL"]
@@ -21,7 +21,7 @@ resource "aws_api_gateway_model" "workflowJobCompletedModel" {
   description  = "webhook example of workflow Job Queued"
   name         = "workflowJobCompletedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./models/workflowJobCompletedModel.json")
+  schema       = file("./models/workflowJobCompletedModel.json")
 }
 
 resource "aws_api_gateway_model" "workflowJobQueuedModel" {
@@ -29,7 +29,7 @@ resource "aws_api_gateway_model" "workflowJobQueuedModel" {
   description  = "webhook example of workflow Job Queued"
   name         = "workflowJobQueuedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./models/workflowJobQueuedModel.json")
+  schema       = file("./models/workflowJobQueuedModel.json")
 }
 
 resource "aws_api_gateway_model" "workflowRunRequestedModel" {
@@ -37,7 +37,7 @@ resource "aws_api_gateway_model" "workflowRunRequestedModel" {
   description  = "webhook example of workflow Job Queued"
   name         = "workflowRunRequestedModel"
   rest_api_id  = aws_api_gateway_rest_api.default.id
-  schema = file("./models/workflowRunRequestedModel.json")
+  schema       = file("./models/workflowRunRequestedModel.json")
 }
 
 
@@ -46,7 +46,7 @@ resource "aws_api_gateway_model" "workflowRunRequestedModel" {
 resource "aws_api_gateway_resource" "termination_resource" {
   rest_api_id = aws_api_gateway_rest_api.default.id
   parent_id   = aws_api_gateway_rest_api.default.root_resource_id
-  path_part   = "termination"
+  path_part   = var.terminate_path
 
 }
 
@@ -54,19 +54,18 @@ resource "aws_api_gateway_resource" "termination_resource" {
 
 
 resource "aws_api_gateway_method" "termination_method" {
-  rest_api_id   = aws_api_gateway_rest_api.default.id
-  resource_id   = aws_api_gateway_resource.termination_resource.id
-  http_method   = "POST"
-  authorization = "NONE"
+  rest_api_id          = aws_api_gateway_rest_api.default.id
+  resource_id          = aws_api_gateway_resource.termination_resource.id
+  http_method          = "POST"
+  authorization        = "NONE"
   request_validator_id = aws_api_gateway_request_validator.default.id
-  # depoends on models
   request_models = {
     "application/json" = "workflowJobCompletedModel"
   }
   request_parameters = {
     "method.request.header.X-GitHub-Enterprise-Host" = false
   }
-depends_on = [ aws_api_gateway_model.workflowJobCompletedModel ] 
+  depends_on = [aws_api_gateway_model.workflowJobCompletedModel]
 }
 
 
@@ -79,7 +78,7 @@ resource "aws_api_gateway_integration" "termination_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   passthrough_behavior    = "WHEN_NO_MATCH"
-  uri = aws_lambda_function.github_actions_termination.invoke_arn
+  uri                     = aws_lambda_function.github_actions_termination.invoke_arn
 }
 
 resource "aws_api_gateway_method_response" "termination_method_response" {
@@ -112,15 +111,15 @@ resource "aws_api_gateway_integration_response" "termination_integration_respons
 resource "aws_api_gateway_resource" "webhook_resource" {
   rest_api_id = aws_api_gateway_rest_api.default.id
   parent_id   = aws_api_gateway_rest_api.default.root_resource_id
-  path_part   = "webhook"
+  path_part   = var.webhook_path
 
 }
 
 resource "aws_api_gateway_method" "webhook_method" {
-  rest_api_id   = aws_api_gateway_rest_api.default.id
-  resource_id   = aws_api_gateway_resource.webhook_resource.id
-  http_method   = "POST"
-  authorization = "NONE"
+  rest_api_id          = aws_api_gateway_rest_api.default.id
+  resource_id          = aws_api_gateway_resource.webhook_resource.id
+  http_method          = "POST"
+  authorization        = "NONE"
   request_validator_id = aws_api_gateway_request_validator.default.id
 
   request_models = {
@@ -129,7 +128,7 @@ resource "aws_api_gateway_method" "webhook_method" {
   request_parameters = {
     "method.request.header.X-GitHub-Enterprise-Host" = true
   }
-depends_on = [ aws_api_gateway_model.workflowJobQueuedModel ] 
+  depends_on = [aws_api_gateway_model.workflowJobQueuedModel]
 }
 
 
@@ -174,10 +173,9 @@ resource "aws_api_gateway_integration_response" "webhook_integration_response" {
 # deployment and stage
 
 resource "aws_api_gateway_deployment" "deployment" {
+  rest_api_id = aws_api_gateway_rest_api.default.id
+  stage_name  = var.aws_api_gateway_deployment
   depends_on = [
     aws_api_gateway_integration.termination_lambda_integration
   ]
-
-  rest_api_id = aws_api_gateway_rest_api.default.id
-  stage_name = "dev"
 }

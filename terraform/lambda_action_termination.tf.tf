@@ -9,14 +9,14 @@ data "aws_iam_policy_document" "aws_lambda_termination_assume_role_policy" {
   }
 }
 resource "aws_iam_policy" "lambda_termination_policy" {
-  name   = "lambda_termination_policy"
+  name   = var.lambda_termination_policy_name
   path   = "/"
   policy = file("./policies/lambda_termination_policy.json")
 }
 resource "aws_iam_role" "lambda_termination_role" {
-  name                  = "github-actions-lambda-termination-role"
-  path                  = "/service-role/"
-  assume_role_policy    = data.aws_iam_policy_document.aws_lambda_termination_assume_role_policy.json
+  name               = var.lambda_termination_role_name
+  path               = "/service-role/"
+  assume_role_policy = data.aws_iam_policy_document.aws_lambda_termination_assume_role_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attachment" {
@@ -25,7 +25,7 @@ resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attach
 
 }
 resource "aws_cloudwatch_log_group" "actions_termination_log_group" {
-  name              = "/aws/lambda/github-actions-termination-fn"
+  name              = var.aws_cloudwatch_log_group_termination_prefix
   retention_in_days = 0
   tags = {
     Confidentiality = "C2"
@@ -38,25 +38,24 @@ data "archive_file" "termination_lambda_package" {
 }
 
 resource "aws_lambda_function" "github_actions_termination" {
-  function_name                      = "github-actions-termination-fn"
-  architectures                      = ["x86_64"]
-  runtime                            = "python3.12"
-  handler                            = "lambda_function.lambda_handler"
-  filename                           = "lambda_termination_function_payload.zip"
-  memory_size                        = 128
-  timeout                            = 900
-  role                               = aws_iam_role.lambda_termination_role.arn
-  package_type                       = "Zip"
-  reserved_concurrent_executions     = -1
-  skip_destroy                       = false
-  # source_code_hash                   =filebase64sha256("lambda_termination_function.py")
-  source_code_hash                   = data.archive_file.termination_lambda_package.output_base64sha256
+  function_name                  = var.lambda_termination_name
+  architectures                  = ["x86_64"]
+  runtime                        = "python3.12"
+  handler                        = "lambda_function.lambda_handler"
+  filename                       = "lambda_termination_function_payload.zip"
+  memory_size                    = 128
+  timeout                        = 900
+  role                           = aws_iam_role.lambda_termination_role.arn
+  package_type                   = "Zip"
+  reserved_concurrent_executions = -1
+  skip_destroy                   = false
+  source_code_hash               = data.archive_file.termination_lambda_package.output_base64sha256
   ephemeral_storage {
     size = 512
   }
 
   tags = {
-    Confidentiality   = "C2"
+    Confidentiality = "C2"
   }
 
   environment {
@@ -67,8 +66,8 @@ resource "aws_lambda_function" "github_actions_termination" {
   }
 
   logging_config {
-    log_format            = "Text"
-    log_group             = "/aws/lambda/github-actions-termination-fn"
+    log_format = "Text"
+    log_group  = var.aws_cloudwatch_log_group_termination_prefix
   }
 
   tracing_config {
@@ -81,11 +80,11 @@ resource "aws_lambda_function" "github_actions_termination" {
 }
 
 resource "aws_lambda_permission" "apigateway_lambda_termination_permission" {
-  statement_id = "AllowExecutionFromAPIGateway"
-  action = "lambda:InvokeFunction"
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.github_actions_termination.function_name
-  principal = "apigateway.amazonaws.com"
-  source_arn = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/termination"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/${terminate_path}"
 
   depends_on = [
     aws_lambda_function.github_actions_termination

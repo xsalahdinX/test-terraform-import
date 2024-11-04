@@ -9,14 +9,14 @@ data "aws_iam_policy_document" "aws_lambda_handler_assume_role_policy" {
   }
 }
 resource "aws_iam_policy" "lambda_handler_policy" {
-  name   = "lambda_handler_policy"
+  name   = var.lambda_handler_policy_name
   path   = "/"
   policy = file("./policies/lambda_handler_policy.json")
 }
 resource "aws_iam_role" "lambda_handler_role" {
-  name                  = "github-actions-lambda-handler-role"
-  path                  = "/service-role/"
-  assume_role_policy    = data.aws_iam_policy_document.aws_lambda_handler_assume_role_policy.json
+  name               = var.lambda_handler_role_name
+  path               = "/service-role/"
+  assume_role_policy = data.aws_iam_policy_document.aws_lambda_handler_assume_role_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_handler_role_policy_attachment" {
@@ -26,7 +26,8 @@ resource "aws_iam_role_policy_attachment" "lambda_handler_role_policy_attachment
 }
 
 resource "aws_cloudwatch_log_group" "actions_handler_log_group" {
-  name              = "/aws/lambda/github-actions-job-handler"
+  name = var.aws_cloudwatch_log_group_handler_prefix
+
   retention_in_days = 0
   tags = {
     Confidentiality = "C2"
@@ -40,24 +41,24 @@ data "archive_file" "handler_lambda_package" {
 }
 
 resource "aws_lambda_function" "actions_handler_lambda_function" {
-  function_name                      = "github-actions-job-handler"
-  architectures                      = ["x86_64"]
-  runtime                            = "python3.11"
-  handler                            = "lambda_function.lambda_handler"
-  filename                           = "lambda_handler_function_payload.zip"
-  memory_size                        = 128
-  timeout                            = 3
-  role                               = aws_iam_role.lambda_handler_role.arn
-  package_type                       = "Zip"
-  reserved_concurrent_executions     = -1
-  skip_destroy                       = false
-  source_code_hash                   = data.archive_file.handler_lambda_package.output_base64sha256
+  function_name                  = var.lambda_handler_name
+  architectures                  = ["x86_64"]
+  runtime                        = "python3.11"
+  handler                        = "lambda_function.lambda_handler"
+  filename                       = "lambda_handler_function_payload.zip"
+  memory_size                    = 128
+  timeout                        = 3
+  role                           = aws_iam_role.lambda_handler_role.arn
+  package_type                   = "Zip"
+  reserved_concurrent_executions = -1
+  skip_destroy                   = false
+  source_code_hash               = data.archive_file.handler_lambda_package.output_base64sha256
   ephemeral_storage {
     size = 512
   }
 
   tags = {
-    Confidentiality   = "C2"
+    Confidentiality = "C2"
   }
 
   environment {
@@ -68,8 +69,8 @@ resource "aws_lambda_function" "actions_handler_lambda_function" {
   }
 
   logging_config {
-    log_format            = "Text"
-    log_group             = "/aws/lambda/github-actions-job-handler"
+    log_format = "Text"
+    log_group  = var.aws_cloudwatch_log_group_handler_prefix
   }
 
   tracing_config {
@@ -79,11 +80,11 @@ resource "aws_lambda_function" "actions_handler_lambda_function" {
 }
 
 resource "aws_lambda_permission" "apigateway_lambda_handler_permission" {
-  statement_id = "AllowExecutionFromAPIGateway"
-  action = "lambda:InvokeFunction"
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.actions_handler_lambda_function.function_name
-  principal = "apigateway.amazonaws.com"
-  source_arn = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/webhook"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.default.execution_arn}/*/POST/${var.webhook_path}"
 
   depends_on = [
     aws_lambda_function.actions_handler_lambda_function
