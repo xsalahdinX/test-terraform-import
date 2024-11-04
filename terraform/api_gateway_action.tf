@@ -1,7 +1,8 @@
 
 resource "aws_api_gateway_rest_api" "default" {
   name        = var.api_gateway_name
-  description = "This is api_gateway of github actions"
+  description = "This is api_gateway for github actions"
+  tags        = merge({ Name = var.api_gateway_name }, var.tags)
 
   endpoint_configuration {
     types = ["REGIONAL"]

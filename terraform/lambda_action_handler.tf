@@ -12,11 +12,14 @@ resource "aws_iam_policy" "lambda_handler_policy" {
   name   = var.lambda_handler_policy_name
   path   = "/"
   policy = templatefile("./policies/lambda_handler_policy.json.tpl", { account_id = var.account_id, launch_template_iam_role_name = var.launch_template_iam_role_name, aws_cloudwatch_log_group_handler_prefix = var.aws_cloudwatch_log_group_handler_prefix, region = var.region })
+  tags        = merge({ Name = var.lambda_handler_policy_name }, var.tags)
 }
 resource "aws_iam_role" "lambda_handler_role" {
   name               = var.lambda_handler_role_name
   path               = "/service-role/"
   assume_role_policy = data.aws_iam_policy_document.aws_lambda_handler_assume_role_policy.json
+  tags        = merge({ Name = var.lambda_handler_role_name }, var.tags)
+
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_handler_role_policy_attachment" {
@@ -53,12 +56,9 @@ resource "aws_lambda_function" "actions_handler_lambda_function" {
   reserved_concurrent_executions = -1
   skip_destroy                   = false
   source_code_hash               = data.archive_file.handler_lambda_package.output_base64sha256
+  tags                           = merge({ Name = var.lambda_handler_name }, var.tags)
   ephemeral_storage {
     size = 512
-  }
-
-  tags = {
-    Confidentiality = "C2"
   }
 
   environment {

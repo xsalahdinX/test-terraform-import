@@ -152,3 +152,9 @@ variable "region" {
 variable "account_id" {
   type        = string
 }
+
+variable "tags" {
+  type        = map(string)
+  description = "Tags that should be added to all resources for compliance purposes"
+  default     = {}
+}
