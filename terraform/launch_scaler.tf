@@ -15,12 +15,15 @@ resource "aws_iam_policy" "coder_policy" {
   name   = var.launch_template_iam_policy_name
   path   = "/"
   policy = file("./policies/coder_policy.json")
+  tags   = merge({ Name = var.launch_template_iam_policy_name }, var.tags)
+
 }
 
 resource "aws_iam_role" "action_instance" {
   name               = var.launch_template_iam_role_name
   path               = "/"
   assume_role_policy = data.aws_iam_policy_document.aws_launch_template_instance_assume_role_policy.json
+  tags               = merge({ Name = var.launch_template_iam_role_name }, var.tags)
 }
 
 resource "aws_iam_role_policy_attachment" "role_policy_attachment_AmazonS3FullAccess" {
@@ -85,10 +88,8 @@ resource "aws_security_group" "action_sg" {
     to_port          = 22
   }]
 
-  tags = {
-    Confidentiality = "C2"
-    Environment     = "Dev"
-  }
+  tags               = merge({ Name = var.launch_template_sg_name }, var.tags)
+
 
 }
 
@@ -100,10 +101,9 @@ resource "aws_launch_template" "action_lanch_template" {
   image_id      = var.launch_template_ami_id
   instance_type = var.launch_template_instance_type
   user_data     = filebase64("./user_data/example.sh")
+  # ebs_optimized = true
 
-  tags = {
-    Confidentiality = "C2"
-  }
+  tags          = merge({ Name = var.launch_template_name }, var.tags)
 
   block_device_mappings {
     device_name = var.launch_template_root_device_name
@@ -131,32 +131,13 @@ resource "aws_launch_template" "action_lanch_template" {
   }
   tag_specifications {
     resource_type = "instance"
-    tags = {
-      Confidentiality   = "C2"
-      Environment       = "DEV"
-      ManagedBy         = "vssefunc.mailboxdeploymentcoe@vodafone.com"
-      ManagementAccount = "242534911695"
-      Name              = "github-actions-resources"
-      Project           = "vois-coe"
-      SecurityZone      = "I-A"
-      TaggingVersion    = "V2.4"
-    }
+    tags = var.tags
   }
   tag_specifications {
     resource_type = "volume"
-    tags = {
-      Confidentiality   = "C2"
-      Environment       = "DEV"
-      ManagedBy         = "vssefunc.mailboxdeploymentcoe@vodafone.com"
-      ManagementAccount = "242534911695"
-      Name              = "github-actions-resources"
-      Project           = "vois-coe"
-      SecurityZone      = "I-A"
-      TaggingVersion    = "V2.4"
-    }
+    tags = var.tags
   }
 }
-
 
 # autoscaling group configuration
 
@@ -174,11 +155,7 @@ resource "aws_autoscaling_group" "action_asg" {
 
   launch_template {
     id = aws_launch_template.action_lanch_template.id
-  }
-  tag {
-    key                 = "Confidentiality"
-    propagate_at_launch = true
-    value               = "C2"
+    version = "$Latest"
   }
   warm_pool {
     max_group_prepared_capacity = -1
@@ -188,4 +165,20 @@ resource "aws_autoscaling_group" "action_asg" {
       reuse_on_scale_in = false
     }
   }
+
+
+  tag {
+    key                 = "NAME"
+    value               = var.autoscaling_group_name
+    propagate_at_launch = true
+  }
+
+  dynamic "tag" {
+    for_each = var.tags
+    content {
+      key                 = tag.value.key
+      value               = tag.value.value
+      propagate_at_launch =  true
+    }
+ }
 }

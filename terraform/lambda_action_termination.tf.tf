@@ -12,11 +12,14 @@ resource "aws_iam_policy" "lambda_termination_policy" {
   name   = var.lambda_termination_policy_name
   path   = "/"
   policy = templatefile("./policies/lambda_termination_policy.json.tpl", { account_id = var.account_id, launch_template_iam_role_name = var.launch_template_iam_role_name, aws_cloudwatch_log_group_termination_prefix = var.aws_cloudwatch_log_group_termination_prefix, region = var.region })
+  tags   = merge({ Name = var.lambda_termination_policy_name }, var.tags)
+
 }
 resource "aws_iam_role" "lambda_termination_role" {
   name               = var.lambda_termination_role_name
   path               = "/service-role/"
   assume_role_policy = data.aws_iam_policy_document.aws_lambda_termination_assume_role_policy.json
+  tags               = merge({ Name = var.lambda_termination_role_name }, var.tags)
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_termination_role_policy_attachment" {
@@ -50,12 +53,9 @@ resource "aws_lambda_function" "github_actions_termination" {
   reserved_concurrent_executions = -1
   skip_destroy                   = false
   source_code_hash               = data.archive_file.termination_lambda_package.output_base64sha256
+  tags                           = merge({ Name = var.lambda_termination_name }, var.tags)
   ephemeral_storage {
     size = 512
-  }
-
-  tags = {
-    Confidentiality = "C2"
   }
 
   environment {
