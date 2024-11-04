@@ -54,7 +54,7 @@ resource "aws_lambda_function" "actions_handler_lambda_function" {
   role                           = aws_iam_role.lambda_handler_role.arn
   package_type                   = "Zip"
   reserved_concurrent_executions = -1
-  skip_destroy                   = false
+  # skip_destroy                   = false
   source_code_hash               = data.archive_file.handler_lambda_package.output_base64sha256
   tags                           = merge({ Name = var.lambda_handler_name }, var.tags)
   ephemeral_storage {
@@ -68,10 +68,10 @@ resource "aws_lambda_function" "actions_handler_lambda_function" {
     }
   }
 
-  logging_config {
-    log_format = "Text"
-    log_group  = var.aws_cloudwatch_log_group_handler_prefix
-  }
+  # logging_config {
+  #   log_format = "Text"
+  #   log_group  = var.aws_cloudwatch_log_group_handler_prefix
+  # }
 
   tracing_config {
     mode = "PassThrough"

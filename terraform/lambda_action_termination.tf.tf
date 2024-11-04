@@ -51,7 +51,7 @@ resource "aws_lambda_function" "github_actions_termination" {
   role                           = aws_iam_role.lambda_termination_role.arn
   package_type                   = "Zip"
   reserved_concurrent_executions = -1
-  skip_destroy                   = false
+  # skip_destroy                   = false
   source_code_hash               = data.archive_file.termination_lambda_package.output_base64sha256
   tags                           = merge({ Name = var.lambda_termination_name }, var.tags)
   ephemeral_storage {
@@ -65,10 +65,10 @@ resource "aws_lambda_function" "github_actions_termination" {
     }
   }
 
-  logging_config {
-    log_format = "Text"
-    log_group  = var.aws_cloudwatch_log_group_termination_prefix
-  }
+  # logging_config {
+  #   log_format = "Text"
+  #   log_group  = var.aws_cloudwatch_log_group_termination_prefix
+  # }
 
   tracing_config {
     mode = "PassThrough"

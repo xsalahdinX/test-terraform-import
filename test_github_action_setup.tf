@@ -11,8 +11,8 @@ module "test_github_action_setup" {
   lambda_termination_policy_name              = "dev-actions-runners-lambda-termination-policy"
   lambda_handler_role_name                    = "dev-actions-runners-lambda-handler-role"
   lambda_termination_role_name                = "dev-actions-runners-lambda-termination-role"
-  aws_cloudwatch_log_group_handler_prefix     = "/aws/lambda/dev-actions-runners-handler-log"
-  aws_cloudwatch_log_group_termination_prefix = "/aws/lambda/dev-actions-runners-termination-log"
+  aws_cloudwatch_log_group_handler_prefix     = "/aws/lambda/dev-actions-runners-lambda-handler"
+  aws_cloudwatch_log_group_termination_prefix = "/aws/lambda/dev-actions-runners-lambda-termination"
   lambda_handler_name                         = "dev-actions-runners-lambda-handler"
   lambda_termination_name                     = "dev-actions-runners-lambda-termination"
 
