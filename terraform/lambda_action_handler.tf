@@ -11,7 +11,6 @@ data "aws_iam_policy_document" "aws_lambda_handler_assume_role_policy" {
 resource "aws_iam_policy" "lambda_handler_policy" {
   name   = var.lambda_handler_policy_name
   path   = "/"
-  # policy = file("./policies/lambda_handler_policy.json")
   policy = templatefile("./policies/lambda_handler_policy.json.tpl", { account_id = var.account_id, launch_template_iam_role_name = var.launch_template_iam_role_name, aws_cloudwatch_log_group_handler_prefix = var.aws_cloudwatch_log_group_handler_prefix, region = var.region })
 }
 resource "aws_iam_role" "lambda_handler_role" {

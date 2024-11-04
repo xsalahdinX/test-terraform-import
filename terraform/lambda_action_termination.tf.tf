@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "aws_lambda_termination_assume_role_policy" {
 resource "aws_iam_policy" "lambda_termination_policy" {
   name   = var.lambda_termination_policy_name
   path   = "/"
-  policy = file("./policies/lambda_termination_policy.json")
+  policy = templatefile("./policies/lambda_termination_policy.json.tpl", { account_id = var.account_id, launch_template_iam_role_name = var.launch_template_iam_role_name, aws_cloudwatch_log_group_termination_prefix = var.aws_cloudwatch_log_group_termination_prefix, region = var.region })
 }
 resource "aws_iam_role" "lambda_termination_role" {
   name               = var.lambda_termination_role_name
