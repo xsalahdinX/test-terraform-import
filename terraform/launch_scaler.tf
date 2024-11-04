@@ -104,6 +104,19 @@ resource "aws_launch_template" "action_lanch_template" {
   tags = {
     Confidentiality = "C2"
   }
+
+  block_device_mappings {
+    device_name = "/dev/sda1"
+
+    ebs {
+      volume_size = 30
+      volume_type = "gp2"
+      delete_on_termination = true
+      encrypted = true
+      iops = 100
+    }
+  }
+
   hibernation_options {
     configured = true
   }
@@ -114,6 +127,32 @@ resource "aws_launch_template" "action_lanch_template" {
     security_groups = [aws_security_group.action_sg.id] #p
     subnet_id       = var.launch_template_subnet_id     #private subnet
 
+  }
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Confidentiality   = "C2"
+      Environment       = "DEV"
+      ManagedBy         = "vssefunc.mailboxdeploymentcoe@vodafone.com"
+      ManagementAccount = "242534911695"
+      Name              = "github-actions-resources"
+      Project           = "vois-coe"
+      SecurityZone      = "I-A"
+      TaggingVersion    = "V2.4"
+    }
+  }
+  tag_specifications {
+    resource_type = "volume"
+    tags = {
+      Confidentiality   = "C2"
+      Environment       = "DEV"
+      ManagedBy         = "vssefunc.mailboxdeploymentcoe@vodafone.com"
+      ManagementAccount = "242534911695"
+      Name              = "github-actions-resources"
+      Project           = "vois-coe"
+      SecurityZone      = "I-A"
+      TaggingVersion    = "V2.4"
+    }
   }
 }
 
